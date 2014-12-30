@@ -1,7 +1,13 @@
 package com.doapps.utils.url;
 
+import com.google.common.base.Optional;
+
+import org.hamcrest.MatcherAssert;
+
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class ModifiableURLTest {
 
@@ -10,6 +16,12 @@ public class ModifiableURLTest {
     ModifiableURL url = ModifiableURL.parse("http://www.google.com");
     assertThat(url.toString(), equalTo("http://www.google.com"));
     assertThat(url.getUrlParams().size(), equalTo(0));
+  }
+
+  @org.junit.Test
+  public void testUrlParseFailure() throws Exception {
+    ModifiableURL url = ModifiableURL.parse("com");
+    assertThat(url,notNullValue());
   }
 
   @org.junit.Test
@@ -71,5 +83,14 @@ public class ModifiableURLTest {
     assertThat(url.getUrlParams().size(), equalTo(2));
     assertThat(url.toString(), containsString("postalCode=55901+12345"));
     assertThat(url.toString(), containsString("default=_DEFAULT_POSTAL_CODE_"));
+  }
+
+  public void testTryParse() throws Exception {
+    String WX_URL = "http://wx.e.com/weather.php?postalCode=_POSTAL_CODE_&default=_DEFAULT_POSTAL_CODE_";
+    Optional<ModifiableURL> url = ModifiableURL.tryParse(WX_URL);
+    MatcherAssert.assertThat(url.isPresent(), equalTo(true));
+
+    url = ModifiableURL.tryParse("");
+    MatcherAssert.assertThat(url.isPresent(), equalTo(false));
   }
 }

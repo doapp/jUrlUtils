@@ -4,7 +4,7 @@
 
   <groupId>com.doapps.utils</groupId>
   <artifactId>jUrlUtils</artifactId>
-  <version>1.1</version>
+  <version>1.2.2</version>
 
   <parent>
     <artifactId>company-config</artifactId>
@@ -21,7 +21,7 @@
   <dependencies>
     <dependency>
       <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
+      <artifactId>guava-jdk5</artifactId>
       <version>14.0.1</version>
     </dependency>
     <dependency>

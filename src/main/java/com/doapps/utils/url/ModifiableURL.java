@@ -25,10 +25,6 @@ public class ModifiableURL {
   private static final char GET_ARG_SEP = '&';
   private static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 
-  // this regex matches the base of the url and puts the scheme in group 1 and
-  // url path into group 2 (everything before the first ?)
-  private static final String URL_BASE_REGEX = "^([^?]+)"; //$NON-NLS-1$
-  private static final Pattern urlBasePattern = Pattern.compile(URL_BASE_REGEX);
   // this regex matches url params in group 1 and values in group 2
   private static final String URL_PARAM_REGEX = "[\\?&]([^&=]+)=([^&=]+)"; //$NON-NLS-1$
   private static final Pattern urlParamPattern = Pattern.compile(URL_PARAM_REGEX);
@@ -37,26 +33,25 @@ public class ModifiableURL {
     if (url == null || url.length() == 0) {
       return new ModifiableURL();
     }
-
-    Matcher matcher = urlBasePattern.matcher(url);
-    if (!matcher.find()) {
-      throw new MalformedURLException(
-          "The following URL base is not parse-able as a structured url: " + url); //$NON-NLS-1$
-    }
-
+    Matcher matcher = urlParamPattern.matcher(url);
     ModifiableURL result = new ModifiableURL();
-
-    result.urlPath = matcher.group(1);
-
-    matcher = urlParamPattern.matcher(url);
-
-    while (matcher.find()) {
-      String key = matcher.group(1);
-      String value = matcher.group(2);
-      result.urlEncodedParams.put(key, value);
+    if(matcher.find()){
+      //found params
+      result.urlPath = url.substring(0, url.indexOf("?"));
+      recordFoundParams(matcher, result);
+      while (matcher.find()) {
+        recordFoundParams(matcher, result);
+      }
+    }else {
+      //no params
+      result.urlPath = url;
     }
-
     return result;
+  }
+  private static void recordFoundParams(Matcher matcher, ModifiableURL result) {
+    String key = matcher.group(1);
+    String value = matcher.group(2);
+    result.urlEncodedParams.put(key, value);
   }
 
   private ModifiableURL() {
@@ -153,5 +148,13 @@ public class ModifiableURL {
       buildUrl();
     }
     return builtUrl;
+  }
+
+  public static Optional<ModifiableURL> tryParse(String url){
+    ModifiableURL modifiableURL = null;
+    try {
+      modifiableURL = ModifiableURL.parse(url);
+    }catch (Throwable ignored){  }
+    return Optional.fromNullable(modifiableURL);
   }
 }
