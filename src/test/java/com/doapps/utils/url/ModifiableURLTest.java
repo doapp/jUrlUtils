@@ -85,8 +85,20 @@ public class ModifiableURLTest {
     assertThat(url.toString(), containsString("default=_DEFAULT_POSTAL_CODE_"));
   }
 
+  @org.junit.Test
   public void testTryParse() throws Exception {
     String WX_URL = "http://wx.e.com/weather.php?postalCode=_POSTAL_CODE_&default=_DEFAULT_POSTAL_CODE_";
+    Optional<ModifiableURL> url = ModifiableURL.tryParse(WX_URL);
+    MatcherAssert.assertThat(url.isPresent(), equalTo(true));
+
+    url = ModifiableURL.tryParse("");
+    MatcherAssert.assertThat(url.isPresent(), equalTo(false));
+  }
+
+  @org.junit.Test
+  public void testTryKVUEParse() throws Exception {
+    String WX_URL = "http://www.gannett-cdn.com/-mm-/239ec2f186d0d97cfd2e6532b75efa2676f3a6c3/ttl=120&r=x513&c"
+                    + "=680x510/http/archive.kvue.com/weather/images/core/HOURBYHOUR_IPAD.jpg";
     Optional<ModifiableURL> url = ModifiableURL.tryParse(WX_URL);
     MatcherAssert.assertThat(url.isPresent(), equalTo(true));
 

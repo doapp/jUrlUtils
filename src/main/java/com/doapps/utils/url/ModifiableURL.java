@@ -31,13 +31,18 @@ public class ModifiableURL {
 
   public static ModifiableURL parse(String url) throws MalformedURLException {
     if (url == null || url.length() == 0) {
-      return new ModifiableURL();
+      return null;
     }
     Matcher matcher = urlParamPattern.matcher(url);
     ModifiableURL result = new ModifiableURL();
     if(matcher.find()){
       //found params
-      result.urlPath = url.substring(0, url.indexOf("?"));
+      int queryDelim = url.indexOf("?");
+      if(queryDelim < 0){
+        queryDelim = url.indexOf("&");
+      }
+
+      result.urlPath = url.substring(0, queryDelim);
       recordFoundParams(matcher, result);
       while (matcher.find()) {
         recordFoundParams(matcher, result);
