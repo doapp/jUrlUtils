@@ -26,31 +26,32 @@ public class ModifiableURL {
   private static final String UTF8 = "UTF-8"; //$NON-NLS-1$
 
   // this regex matches url params in group 1 and values in group 2
-  private static final String URL_PARAM_REGEX = "[\\?&]([^&=]+)=([^&=]+)"; //$NON-NLS-1$
-  private static final Pattern urlParamPattern = Pattern.compile(URL_PARAM_REGEX);
+  private static final String URL_QUERY_REGEX = "[\\?&]([^&=]+)=([^&=]+)"; //$NON-NLS-1$
+  private static final Pattern urlQueryPattern = Pattern.compile(URL_QUERY_REGEX);
 
   public static ModifiableURL parse(String url) throws MalformedURLException {
     if (url == null || url.length() == 0) {
       return null;
     }
-    Matcher matcher = urlParamPattern.matcher(url);
-    ModifiableURL result = new ModifiableURL();
-    if(matcher.find()){
-      //found params
-      int queryDelim = url.indexOf("?");
-      if(queryDelim < 0){
-        queryDelim = url.indexOf("&");
-      }
 
-      result.urlPath = url.substring(0, queryDelim);
-      recordFoundParams(matcher, result);
-      while (matcher.find()) {
+    ModifiableURL result = new ModifiableURL();
+
+    if (url.contains("?")) {
+      //has query to parse
+      Matcher matcher = urlQueryPattern.matcher(url);
+      if (matcher.find()) {
+        //found params
+        result.urlPath = url.substring(0, url.indexOf("?"));
         recordFoundParams(matcher, result);
+        while (matcher.find()) {
+          recordFoundParams(matcher, result);
+        }
       }
-    }else {
-      //no params
+    } else {
+      //no query to parse
       result.urlPath = url;
     }
+
     return result;
   }
   private static void recordFoundParams(Matcher matcher, ModifiableURL result) {
@@ -155,11 +156,12 @@ public class ModifiableURL {
     return builtUrl;
   }
 
-  public static Optional<ModifiableURL> tryParse(String url){
+  public static Optional<ModifiableURL> tryParse(String url) {
     ModifiableURL modifiableURL = null;
     try {
       modifiableURL = ModifiableURL.parse(url);
-    }catch (Throwable ignored){  }
+    } catch (Throwable ignored) {
+    }
     return Optional.fromNullable(modifiableURL);
   }
 }
