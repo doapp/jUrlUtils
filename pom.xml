@@ -9,7 +9,7 @@
   <parent>
     <artifactId>company-config</artifactId>
     <groupId>com.doapps</groupId>
-    <version>1.0</version>
+    <version>2.0</version>
   </parent>
 
   <scm>
