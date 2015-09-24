@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,7 +28,7 @@ public class ModifiableURL {
   private static final String URL_QUERY_REGEX = "[\\?&]([^&=]+)=([^&=]+)"; //$NON-NLS-1$
   private static final Pattern urlQueryPattern = Pattern.compile(URL_QUERY_REGEX);
 
-  public static ModifiableURL parse(String url) throws MalformedURLException {
+  public static ModifiableURL parse(String url) {
     if (url == null || url.length() == 0) {
       return null;
     }
@@ -46,11 +45,16 @@ public class ModifiableURL {
         while (matcher.find()) {
           recordFoundParams(matcher, result);
         }
+      } else {
+        // there is a query string but we couldn't parse it so the url will appear to be a null value.  Set the
+        // result to null so it at least can be caught and handled.
+        result = null;
       }
     } else {
       //no query to parse
       result.urlPath = url;
     }
+
 
     return result;
   }
@@ -157,11 +161,7 @@ public class ModifiableURL {
   }
 
   public static Optional<ModifiableURL> tryParse(String url) {
-    ModifiableURL modifiableURL = null;
-    try {
-      modifiableURL = ModifiableURL.parse(url);
-    } catch (Throwable ignored) {
-    }
+    ModifiableURL modifiableURL = ModifiableURL.parse(url);
     return Optional.fromNullable(modifiableURL);
   }
 }

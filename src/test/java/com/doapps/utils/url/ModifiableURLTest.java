@@ -3,11 +3,15 @@ package com.doapps.utils.url;
 import com.google.common.base.Optional;
 
 import org.hamcrest.MatcherAssert;
+import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 public class ModifiableURLTest {
 
@@ -77,7 +81,7 @@ public class ModifiableURLTest {
     assertThat(url.toString(), containsString("d=123+456+789"));
 
     url.addParam("e", "test");
-    assertThat(url.getUrlParams(), hasEntry("e","test"));
+    assertThat(url.getUrlParams(), hasEntry("e", "test"));
   }
 
   @org.junit.Test
@@ -164,17 +168,50 @@ public class ModifiableURLTest {
       "http://newuser:newpass@example.com/path/to/resource?query=x#fragment",
       "http://example.com/path/to/resource?query=x#fragment",
       "http://user:pass@example.com/newpath?query=x#fragment",
-      "http://user:pass@example.com:42/newpath?#fragment",
       "http://foo:bar@baz:42/path/to/resource?query=x#fragment",
       "http://user:pass@example.com/path/to/resource?query=x#fragment",
       "http://foo:bar@baz:42/path/to/resource?query=x#fragment"
       };
 
+  private static String BAD_URL_BASE = "http://example.com/file";
+
+  private static String [] BAD_URLS = {
+      "http://example.com/file?",
+      "http://example.com/file?val",
+      "http://example.com/file?val=",
+      "http://user:pass@example.com:42/newpath?#fragment",
+  };
+
+  private static String REVISABLE_URL_BASE = "http://example.com/file?key=value";
+
+  private static String [] REVISABLE_URLS = {
+      "http://example.com/file?key=value&otherkey=",
+      "http://example.com/file?key=value&otherkey"
+  };
+
+
   @org.junit.Test
   public void testTryUserPasswordParse() throws Exception {
     for(String URL : URLS) {
       Optional<ModifiableURL> url = ModifiableURL.tryParse(URL);
-      MatcherAssert.assertThat(url.isPresent(), equalTo(true));
+      MatcherAssert.assertThat(URL, url.isPresent(), equalTo(true));
+    }
+  }
+
+  @org.junit.Test
+  public void testTryBadUrls() throws Exception {
+    for (String testUrl : BAD_URLS) {
+      Optional<ModifiableURL> urlOptional = ModifiableURL.tryParse(testUrl);
+      assertThat("On url " + testUrl, urlOptional.isPresent(), is(false));
+    }
+  }
+
+  @Test
+  public void testRevisableUrls() throws Exception {
+    for (String testUrl : REVISABLE_URLS) {
+      Optional<ModifiableURL> urlOptional = ModifiableURL.tryParse(testUrl);
+      assertThat("On url " + testUrl, urlOptional.isPresent(), is(true));
+      assertThat("On url " + testUrl, urlOptional.get().toString(), is(REVISABLE_URL_BASE));
     }
   }
 }
